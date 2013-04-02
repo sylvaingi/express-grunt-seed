@@ -1,6 +1,7 @@
 // Generated on 2013-04-02 using generator-webapp 0.1.5
 'use strict';
 var lrSnippet = require('grunt-contrib-livereload/lib/utils').livereloadSnippet;
+var proxySnippet = require('grunt-connect-proxy/lib/utils').proxyRequest;
 var mountFolder = function (connect, dir) {
     return connect.static(require('path').resolve(dir));
 };
@@ -14,6 +15,8 @@ var mountFolder = function (connect, dir) {
 module.exports = function (grunt) {
     // load all grunt tasks
     require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
+    grunt.loadNpmTasks('grunt-express-server');
+    grunt.loadNpmTasks('grunt-connect-proxy');
 
     // configurable paths
     var yeomanConfig = {
@@ -36,15 +39,23 @@ module.exports = function (grunt) {
                 files: ['<%= yeoman.app %>/styles/{,*/}*.{scss,sass}'],
                 tasks: ['compass']
             },
+            express: {
+                files: ['server/{,*/}*.js'],
+                tasks: ['express-server', 'livereload']
+            },
             livereload: {
                 files: [
                     '<%= yeoman.app %>/*.html',
                     '{.tmp,<%= yeoman.app %>}/styles/{,*/}*.css',
                     '{.tmp,<%= yeoman.app %>}/scripts/{,*/}*.js',
-                    '<%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,webp}'
+                    '<%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,webp}',
+                    'server/{,*/}*.html'
                 ],
                 tasks: ['livereload']
             }
+        },
+        server: {
+            script: 'server/app.js'
         },
         connect: {
             options: {
@@ -52,13 +63,18 @@ module.exports = function (grunt) {
                 // change this to '0.0.0.0' to access the server from outside
                 hostname: 'localhost'
             },
+            proxies: [
+                {
+                    context: '/',
+                    host: 'localhost',
+                    port: 3000
+                }
+            ],
             livereload: {
                 options: {
                     middleware: function (connect) {
                         return [
-                            lrSnippet,
-                            mountFolder(connect, '.tmp'),
-                            mountFolder(connect, 'client')
+                            proxySnippet
                         ];
                     }
                 }
@@ -100,7 +116,8 @@ module.exports = function (grunt) {
                 'Gruntfile.js',
                 '<%= yeoman.app %>/scripts/{,*/}*.js',
                 '!<%= yeoman.app %>/scripts/vendor/*',
-                '<%= yeoman.app %>/test/spec/{,*/}*.js'
+                '<%= yeoman.app %>/test/spec/{,*/}*.js',
+                'server/**/*'
             ]
         },
         mocha: {
@@ -250,6 +267,8 @@ module.exports = function (grunt) {
             'clean:server',
             'coffee:dist',
             'compass:server',
+            'configureProxies',
+            'express-server',
             'livereload-start',
             'connect:livereload',
             'open',

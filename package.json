@@ -1,7 +1,14 @@
 {
   "name": "express-lr-app",
-  "version": "0.0.0",
-  "dependencies": {},
+  "private": true,
+  "scripts": {
+    "start": "node server/app.js"
+  },
+  "dependencies": {
+    "express": "3.1.1",
+    "hjs": "*",
+    "hogan-express": "~0.3.3"
+  },
   "devDependencies": {
     "grunt": "~0.4.0",
     "grunt-contrib-copy": "~0.4.0",
@@ -21,7 +28,9 @@
     "grunt-regarde": "~0.1.1",
     "grunt-mocha": "~0.2.2",
     "grunt-open": "~0.2.0",
-    "matchdep": "~0.1.1"
+    "matchdep": "~0.1.1",
+    "grunt-express-server": "~0.1.0",
+    "grunt-connect-proxy": "~0.1.1"
   },
   "engines": {
     "node": ">=0.8.0"
