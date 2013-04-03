@@ -1,12 +1,12 @@
 'use strict';
 
 var express = require('express');
-var routes = require('./routes');
-var user = require('./routes/user');
 var http = require('http');
 var path = require('path');
 
 var app = express();
+
+var controllers = [ 'index', 'user' ];
 
 // all environments
 app.set('port', process.env.PORT || 3000);
@@ -19,7 +19,6 @@ app.use(express.logger('dev'));
 app.use(express.bodyParser());
 app.use(express.methodOverride());
 app.use(app.router);
-app.enable('trust proxy');
 
 // development only
 if ('development' === app.get('env')) {
@@ -37,8 +36,9 @@ if ('production' === app.get('env')) {
     app.use(express.static(path.join(__dirname, 'public')));
 }
 
-app.get('/', routes.index);
-app.get('/users', user.list);
+controllers.forEach(function (controllerName) {
+    require('./controllers/' + controllerName)(app);
+});
 
 http.createServer(app).listen(app.get('port'), function () {
     console.log('Express server listening on port ' + app.get('port'));
