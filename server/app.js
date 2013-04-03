@@ -1,13 +1,10 @@
+'use strict';
 
-/**
- * Module dependencies.
- */
-
-var express = require('express')
-  , routes = require('./routes')
-  , user = require('./routes/user')
-  , http = require('http')
-  , path = require('path');
+var express = require('express');
+var routes = require('./routes');
+var user = require('./routes/user');
+var http = require('http');
+var path = require('path');
 
 var lrSnippet = require('grunt-contrib-livereload/lib/utils').livereloadSnippet;
 
@@ -18,7 +15,7 @@ app.set('port', process.env.PORT || 3000);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'html');
 app.set('layout', 'layout');
-app.engine ('html', require('hogan-express'));
+app.engine('html', require('hogan-express'));
 app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
@@ -37,13 +34,13 @@ if ('development' === app.get('env')) {
     app.set('partials', {lr: 'lr'});
 }
 
-if ('production' === app.get('env')){
+if ('production' === app.get('env')) {
     //TODO
 }
 
 app.get('/', routes.index);
 app.get('/users', user.list);
 
-http.createServer(app).listen(app.get('port'), function(){
+http.createServer(app).listen(app.get('port'), function () {
     console.log('Express server listening on port ' + app.get('port'));
 });
