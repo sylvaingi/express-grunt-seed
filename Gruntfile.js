@@ -174,13 +174,6 @@ module.exports = function (grunt) {
             dist: {}
         },*/
         uglify: {
-            dist: {
-                files: {
-                    '<%= yeoman.distClient %>/scripts/main.js': [
-                        '<%= yeoman.client %>/scripts/{,*/}*.js'
-                    ],
-                }
-            }
         },
         rev: {
             dist: {
