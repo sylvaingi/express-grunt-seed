@@ -262,16 +262,17 @@ module.exports = function (grunt) {
                     cwd: '<%= yeoman.server %>',
                     src: '**/*',
                     dest: '<%= yeoman.dist %>'
-                },
-                {
-                    src: 'package.json',
-                    dest: '<%= yeoman.dist %>/package.json'
                 }]
             }
         },
         bower: {
             all: {
                 rjsConfig: '<%= yeoman.client %>/scripts/main.js'
+            }
+        },
+        npmShrinkwrap: {
+            dist: {
+                dest: '<%= yeoman.dist %>'
             }
         }
     });
@@ -316,7 +317,8 @@ module.exports = function (grunt) {
         'uglify',
         'copy',
         'rev',
-        'usemin'
+        'usemin',
+        'npmShrinkwrap:dist'
     ]);
 
     grunt.registerTask('default', [
@@ -324,4 +326,40 @@ module.exports = function (grunt) {
         'test',
         'build'
     ]);
+
+    grunt.registerMultiTask('npmShrinkwrap', function () {
+        var dest = this.data.dest || '.';
+
+        var done = this.async();
+        var packageJson = grunt.file.readJSON('package.json');
+        delete packageJson.devDependencies;
+
+        packageJson = JSON.stringify(packageJson);
+        grunt.file.write(dest + '/package.json', packageJson);
+
+        var spawnNpmCommand = function (command, callback) {
+            var cp = grunt.util.spawn({
+                cmd: 'npm',
+                args: [command],
+                opts : { cwd: dest}
+            }, callback);
+
+            if (grunt.option('verbose')) {
+                cp.stdout.pipe(process.stdout);
+                cp.stderr.pipe(process.stderr);
+            }
+        };
+
+        grunt.util.async.series([
+            function (callback) { spawnNpmCommand('install', callback); },
+            function (callback) { spawnNpmCommand('shrinkwrap', callback); }
+        ],
+        function (err, results) {
+            if (err) {
+                grunt.log.writeln(err);
+            }
+
+            done(!!!err);
+        });
+    });
 };
