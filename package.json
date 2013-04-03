@@ -1,5 +1,5 @@
 {
-  "name": "express-lr-app",
+  "name": "express-grunt-seed",
   "private": true,
   "scripts": {
     "start": "node server/app.js"
