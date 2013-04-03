@@ -6,8 +6,6 @@ var user = require('./routes/user');
 var http = require('http');
 var path = require('path');
 
-var lrSnippet = require('grunt-contrib-livereload/lib/utils').livereloadSnippet;
-
 var app = express();
 
 // all environments
@@ -30,12 +28,13 @@ if ('development' === app.get('env')) {
     app.use(express.static(path.join(__dirname, '../client')));
     app.use(express.static(path.join(__dirname, '../.tmp')));
 
+    var lrSnippet = require('grunt-contrib-livereload/lib/utils').livereloadSnippet;
     app.use(lrSnippet);
     app.set('partials', {lr: 'lr'});
 }
 
 if ('production' === app.get('env')) {
-    //TODO
+    app.use(express.static(path.join(__dirname, 'public')));
 }
 
 app.get('/', routes.index);
