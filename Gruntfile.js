@@ -43,14 +43,16 @@ module.exports = function (grunt) {
                 tasks: ['compass']
             },
             express: {
-                files: ['<%= yeoman.server %>/{,*/}*.js'],
+                files: ['<%= yeoman.server %>/{,*/}*.js', '!<%= yeoman.server %>/test/{,*/}*.js'],
                 tasks: ['express-server', 'livereload']
             },
             clientTest: {
+                spawn: true,
                 files: ['<%= yeoman.client %>/test/spec/{,*/}*.js'],
                 tasks: ['connect:test', 'mocha']
             },
             serverTest: {
+                spawn: true,
                 files: ['<%= yeoman.server %>/test/{,*/}*.js'],
                 tasks: ['simplemocha']
             },
@@ -92,6 +94,7 @@ module.exports = function (grunt) {
             },
             test: {
                 options: {
+                    port: 9001,
                     middleware: function (connect) {
                         return [
                             mountFolder(connect, '.tmp'),
@@ -135,7 +138,7 @@ module.exports = function (grunt) {
             all: {
                 options: {
                     run: true,
-                    urls: ['http://localhost:<%= connect.options.port %>/index.html']
+                    urls: ['http://localhost:<%= connect.test.options.port %>/index.html']
                 }
             }
         },
@@ -145,7 +148,8 @@ module.exports = function (grunt) {
                     timeout: 3000,
                     ignoreLeaks: false,
                     ui: 'bdd',
-                    reporter: 'nyan'
+                    reporter: 'nyan',
+                    growl: true
                 },
                 src: '<%= yeoman.server %>/test/{,*/}*.js'
             }
