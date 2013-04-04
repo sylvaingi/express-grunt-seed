@@ -17,6 +17,7 @@ module.exports = function (grunt) {
     require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
     grunt.loadNpmTasks('grunt-express-server');
     grunt.loadNpmTasks('grunt-connect-proxy');
+    grunt.loadNpmTasks('grunt-simple-mocha');
 
     // configurable paths
     var yeomanConfig = {
@@ -44,6 +45,14 @@ module.exports = function (grunt) {
             express: {
                 files: ['<%= yeoman.server %>/{,*/}*.js'],
                 tasks: ['express-server', 'livereload']
+            },
+            clientTest: {
+                files: ['<%= yeoman.client %>/test/spec/{,*/}*.js'],
+                tasks: ['connect:test', 'mocha']
+            },
+            serverTest: {
+                files: ['<%= yeoman.server %>/test/{,*/}*.js'],
+                tasks: ['simplemocha']
             },
             livereload: {
                 files: [
@@ -91,11 +100,11 @@ module.exports = function (grunt) {
                     }
                 }
             },
-            dist: {
+            dist:{
                 options: {
                     middleware: function (connect) {
                         return [
-                            mountFolder(connect, 'dist')
+                            proxySnippet
                         ];
                     }
                 }
@@ -128,6 +137,17 @@ module.exports = function (grunt) {
                     run: true,
                     urls: ['http://localhost:<%= connect.options.port %>/index.html']
                 }
+            }
+        },
+        simplemocha: {
+            all: {
+                options: {
+                    timeout: 3000,
+                    ignoreLeaks: false,
+                    ui: 'bdd',
+                    reporter: 'nyan'
+                },
+                src: '<%= yeoman.server %>/test/{,*/}*.js'
             }
         },
         coffee: {
@@ -260,7 +280,7 @@ module.exports = function (grunt) {
                 {
                     expand: true,
                     cwd: '<%= yeoman.server %>',
-                    src: '**/*',
+                    src: ['**/*', '!test/**/*', '!test'],
                     dest: '<%= yeoman.dist %>'
                 }]
             }
@@ -281,7 +301,10 @@ module.exports = function (grunt) {
 
     grunt.registerTask('server', function (target) {
         if (target === 'dist') {
-            return grunt.task.run(['build', 'open', 'connect:dist:keepalive']);
+            process.env.NODE_ENV = 'production';
+
+            grunt.config.set('server.script', 'dist/app.js');
+            return grunt.task.run(['build', 'express-server', 'configureProxies', 'open', 'connect:dist:keepalive']);
         }
 
         grunt.task.run([
@@ -299,6 +322,7 @@ module.exports = function (grunt) {
 
     grunt.registerTask('test', [
         'clean:server',
+        'simplemocha',
         'coffee',
         'compass',
         'connect:test',
@@ -321,11 +345,13 @@ module.exports = function (grunt) {
         'npmShrinkwrap:dist'
     ]);
 
-    grunt.registerTask('default', [
+    grunt.registerTask('dist', [
         'jshint',
         'test',
         'build'
     ]);
+
+    grunt.registerTask('default', ['server']);
 
     grunt.registerMultiTask('npmShrinkwrap', function () {
         var dest = this.data.dest || '.';
