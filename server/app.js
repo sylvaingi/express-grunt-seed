@@ -6,7 +6,7 @@ var path = require('path');
 
 var app = express();
 
-var controllers = [ 'index', 'user' ];
+var controllers = [ 'index', 'post' ];
 
 // all environments
 app.set('port', process.env.PORT || 3000);
