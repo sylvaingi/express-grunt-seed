@@ -31,14 +31,17 @@ module.exports = function (grunt) {
         yeoman: yeomanConfig,
         watch: {
             coffee: {
+                spawn: true,
                 files: ['<%= yeoman.client %>/scripts/{,*/}*.coffee'],
                 tasks: ['coffee:dist']
             },
             coffeeTest: {
+                spawn: true,
                 files: ['test/spec/{,*/}*.coffee'],
                 tasks: ['coffee:test']
             },
             compass: {
+                spawn: true,
                 files: ['<%= yeoman.client %>/styles/{,*/}*.{scss,sass}'],
                 tasks: ['compass']
             },
@@ -234,6 +237,16 @@ module.exports = function (grunt) {
                 }]
             }
         },
+        svgmin: {
+            dist: {
+                files: [{
+                    expand: true,
+                    cwd: '<%= yeoman.client %>/images',
+                    src: '{,*/}*.svg',
+                    dest: '<%= yeoman.distClient %>/images'
+                }]
+            }
+        },
         cssmin: {
             dist: {
                 files: {
@@ -289,15 +302,27 @@ module.exports = function (grunt) {
                 }]
             }
         },
-        bower: {
-            all: {
-                rjsConfig: '<%= yeoman.client %>/scripts/main.js'
-            }
-        },
         npmShrinkwrap: {
             dist: {
                 dest: '<%= yeoman.dist %>'
             }
+        },
+        concurrent: {
+            server: [
+                'coffee:dist',
+                'compass:server'
+            ],
+            test: [
+                'coffee',
+                'compass'
+            ],
+            dist: [
+                'coffee',
+                'compass:dist',
+                'imagemin',
+                'svgmin',
+                'htmlmin'
+            ]
         }
     });
 
@@ -313,8 +338,7 @@ module.exports = function (grunt) {
 
         grunt.task.run([
             'clean:server',
-            'coffee:dist',
-            'compass:server',
+            'concurrent:server',
             'configureProxies',
             'express-server',
             'livereload-start',
@@ -327,21 +351,17 @@ module.exports = function (grunt) {
     grunt.registerTask('test', [
         'clean:server',
         'simplemocha',
-        'coffee',
-        'compass',
+        'concurrent:test',
         'connect:test',
         'mocha'
     ]);
 
     grunt.registerTask('build', [
         'clean:dist',
-        'coffee',
-        'compass:dist',
         'useminPrepare',
-        'imagemin',
-        //'htmlmin',
-        'concat',
+        'concurrent:dist',
         'cssmin',
+        'concat',
         'uglify',
         'copy',
         'rev',
