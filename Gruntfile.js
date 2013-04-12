@@ -79,22 +79,6 @@ module.exports = function (grunt) {
                 // change this to '0.0.0.0' to access the server from outside
                 hostname: 'localhost'
             },
-            proxies: [
-                {
-                    context: '/',
-                    host: 'localhost',
-                    port: 3000
-                }
-            ],
-            livereload: {
-                options: {
-                    middleware: function (connect) {
-                        return [
-                            proxySnippet
-                        ];
-                    }
-                }
-            },
             test: {
                 options: {
                     port: 9001,
@@ -106,19 +90,11 @@ module.exports = function (grunt) {
                     }
                 }
             },
-            dist:{
-                options: {
-                    middleware: function (connect) {
-                        return [
-                            proxySnippet
-                        ];
-                    }
-                }
-            }
+            dist: {}
         },
         open: {
             server: {
-                path: 'http://localhost:<%= connect.options.port %>'
+                path: 'http://localhost:3000'
             }
         },
         clean: {
@@ -333,16 +309,14 @@ module.exports = function (grunt) {
             process.env.NODE_ENV = 'production';
 
             grunt.config.set('server.script', 'dist/app.js');
-            return grunt.task.run(['build', 'express-server', 'configureProxies', 'open', 'connect:dist:keepalive']);
+            return grunt.task.run(['build', 'express-server', 'open', 'connect:dist:keepalive']);
         }
 
         grunt.task.run([
             'clean:server',
             'concurrent:server',
-            'configureProxies',
             'express-server',
             'livereload-start',
-            'connect:livereload',
             'open',
             'watch'
         ]);

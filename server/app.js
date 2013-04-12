@@ -24,10 +24,6 @@ if ('development' === app.get('env')) {
 
     app.use(express.static(path.join(__dirname, '../client')));
     app.use(express.static(path.join(__dirname, '../.tmp')));
-
-    var lrSnippet = require('grunt-contrib-livereload/lib/utils').livereloadSnippet;
-    app.use(lrSnippet);
-    app.set('partials', {lr: 'lr'});
 }
 
 if ('production' === app.get('env')) {
