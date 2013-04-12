@@ -37,6 +37,15 @@ if ('production' === app.get('env')) {
 app.use(function (req, res, next){
     res.status(404);
     res.render('404', { url: req.url });
+});
+
+app.use(function(err, req, res, next){
+    res.status(err.status || 500);
+    res.render('500', { error: err });
+});
+
+var controllerDirectory = __dirname + '/controllers';
+fs.readdirSync(controllerDirectory).forEach(function (file) {
     require(controllerDirectory + '/' + file)(app);
 });
 
