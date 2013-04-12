@@ -3,24 +3,22 @@
 var express = require('express');
 var http = require('http');
 var path = require('path');
+var fs = require('fs');
 
 var app = express();
 
-var controllers = [ 'index', 'post' ];
-
-// all environments
 app.set('port', process.env.PORT || 3000);
+
 app.set('views', __dirname + '/views');
 app.set('view engine', 'html');
 app.set('layout', 'layout');
 app.engine('html', require('hogan-express'));
+
 app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
-app.use(express.methodOverride());
 app.use(app.router);
 
-// development only
 if ('development' === app.get('env')) {
     app.use(express.errorHandler());
 
@@ -36,8 +34,10 @@ if ('production' === app.get('env')) {
     app.use(express.static(path.join(__dirname, 'public')));
 }
 
-controllers.forEach(function (controllerName) {
-    require('./controllers/' + controllerName)(app);
+app.use(function (req, res, next){
+    res.status(404);
+    res.render('404', { url: req.url });
+    require(controllerDirectory + '/' + file)(app);
 });
 
 http.createServer(app).listen(app.get('port'), function () {
