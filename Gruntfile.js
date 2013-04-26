@@ -271,11 +271,19 @@ module.exports = function (grunt) {
                     src: ['**/*', '!test/**/*', '!test'],
                     dest: '<%= yeoman.dist %>'
                 }]
+            },
+            manifests: {
+                expand: true,
+                cwd: 'manifests',
+                src: '*.yml',
+                dest: '<%= yeoman.dist %>'
             }
         },
-        npmShrinkwrap: {
-            dist: {
-                dest: '<%= yeoman.dist %>'
+        npmsw: {
+            all: {
+                options: {
+                    dir: '<%= yeoman.dist %>'
+                }
             }
         },
         concurrent: {
@@ -334,33 +342,37 @@ module.exports = function (grunt) {
         'uglify',
         'copy',
         'rev',
-        'usemin',
-        'npmShrinkwrap:dist'
+        'usemin'
     ]);
 
-    grunt.registerTask('dist', [
-        'jshint',
-        'test',
-        'build'
-    ]);
+    grunt.registerTask('dist', function (target) {
+        var tasks = ['jshint', 'test', 'build'];
+
+        if (target === 'cloud') {
+            tasks.push('npmsw', 'copy:manifests');
+        }
+
+        return grunt.task.run(tasks);
+    });
 
     grunt.registerTask('default', ['server']);
 
-    grunt.registerMultiTask('npmShrinkwrap', function () {
-        var dest = this.data.dest || '.';
-
+    grunt.registerMultiTask('npmsw', function () {
         var done = this.async();
+
+        var dir = this.data.options.dir;
+
         var packageJson = grunt.file.readJSON('package.json');
         delete packageJson.devDependencies;
 
-        packageJson = JSON.stringify(packageJson);
-        grunt.file.write(dest + '/package.json', packageJson);
+        packageJson = JSON.stringify(packageJson, null, '\t');
+        grunt.file.write(dir + '/package.json', packageJson);
 
         var spawnNpmCommand = function (command, callback) {
             var cp = grunt.util.spawn({
                 cmd: 'npm',
                 args: [command],
-                opts : { cwd: dest}
+                opts : {cwd: dir}
             }, callback);
 
             if (grunt.option('verbose')) {
