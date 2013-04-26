@@ -1,7 +1,5 @@
 // Generated on 2013-04-02 using generator-webapp 0.1.5
 'use strict';
-var lrSnippet = require('grunt-contrib-livereload/lib/utils').livereloadSnippet;
-var proxySnippet = require('grunt-connect-proxy/lib/utils').proxyRequest;
 var mountFolder = function (connect, dir) {
     return connect.static(require('path').resolve(dir));
 };
@@ -15,9 +13,6 @@ var mountFolder = function (connect, dir) {
 module.exports = function (grunt) {
     // load all grunt tasks
     require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
-    grunt.loadNpmTasks('grunt-express-server');
-    grunt.loadNpmTasks('grunt-connect-proxy');
-    grunt.loadNpmTasks('grunt-simple-mocha');
 
     // configurable paths
     var yeomanConfig = {
